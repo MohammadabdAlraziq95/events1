@@ -1,0 +1,183 @@
+<div *ngIf="(todosItems | async)?.length == 0" style="margin:30px;" >
+    <div class="container">
+        <div class="jumbotron">
+                <h1 class="display-4"><i class="fas fa-laugh"></i> No! Events yet..</h1>
+                <p class="lead">No events has been added so far, hit <b>Get Started <i class="fas fa-hand-point-down"></i><i class="fas fa-hand-point-down"></i></b> to add your first event.</p>
+                <hr class="my-4">
+                <p>Avaliabe on <i class="fab fa-github-alt"></i><a href="https://github.com/libyapages/Event-Reminder---Angular-6" target="_blank"> Github.</a> </p>
+                <a class="btn btn-dark" routerLink="addtodo" role="button"><i class="fas fa-plus"></i> Get Started.. Add your first event</a> &nbsp; <a class="btn btn-light" routerLink="about" role="button"><i class="fas fa-info-circle"></i> Learn more</a> <a class="btn btn-link" routerLink="todosetting" role="button">Settings</a>
+        </div>
+        <div style="color:gray; text-align: left; font-style: italic; margin-top: -20px; font-size: 0.9em">Developed by: <span style="font-weight: bold"><a href="mailto:hakem_g@yahoo.com"> Hakim Elkharbash </a></span> @ 2018.</div>
+        <div style="text-align: right; font-size: 0.75em; margin-top: -20px"><a href="https://www.linkedin.com/in/hakim-elkharbash/" target="_blank" class="linkCo"><i class="fab fa-linkedin fa-2x"></i></a> &nbsp; <a href="https://github.com/libyapages" target="_blank" class="linkCo"><i class="fab fa-github fa-2x"></i></a> &nbsp; <a href="https://www.facebook.com/LibyaPages.Net" target="_blank" class="linkCo"><i class="fab fa-facebook fa-2x"></i></a></div>
+
+    </div>
+</div>
+
+
+
+
+<!-- <div> {{ (todosItems | async)?.length }} </div>  To count items in observable array-->
+
+
+<div class="container" *ngIf="(todosItems | async)?.length != 0">
+    <div *ngIf="(todosItems | async); let items" @explainerAnim (@explainerAnim.start)="onAnimationStart($event)" (@explainerAnim.done)="onAnimationEnd($event)">
+        <!-- Animation has to be without (async) pipe, therefore I apply it on the *ngIf and resolve it as (items) then use item with *ngFor as shown below-->
+        
+        <div *ngIf="ShearedData?.length > 0 || ShearedDataOption?.length > 0 " style="padding-bottom:10px;">
+            <button type="button" class="btn btn-dark">
+               Searhing on: <span style="font-weight:bold; padding-right: 10px;">{{ShearedData}} </span> | Showing: <span style="font-weight:bold; padding-right: 10px;">  ( {{ShearedDataOption}} ) Events.</span>
+                <!--  {{ (items | filters: ShearedData)?.length }} (To count the filter results)-->            
+            </button>
+            <div class=" float-right">
+                    <button type="button" class="btn btn-dark">
+                            Found: <span class="badge badge-light">{{ (items | filters: ShearedData :ShearedDataOption)?.length }} Of {{items?.length}}</span>
+                    </button>
+            </div>
+        </div>
+
+        <div *ngIf="(items | filters: ShearedData :ShearedDataOption)?.length == 0" style="text-align:center; padding:25px; font-size:2em;">
+            <div class="jumbotron">
+                <p><i class="far fa-grin-wink"></i> No results founded.. Try again.</p>
+            </div>               
+        </div>
+        
+       
+        <div class="card text-white border-info bg-dark  mb-3" *ngFor="let item of items | filters: ShearedData :ShearedDataOption; let i = index; trackBy: trackObject"
+                [ngStyle]="{'opacity':item.flag === 'Active' ? '1' : '0.85','font-style':item.flag === 'Active' ? 'normal' : 'italic'}"
+                style="border:2px blue"
+            >
+                <div class="card-header">
+                    <div class="btn-group pull-right" role="group" aria-label="Basic example">  
+                        <span class="Stime" placement="bottom" ngbTooltip="{{ item.Sdate | date:'full' }}">{{ item.Sdate | date:'MMM d, yy ~ H:m'}}</span> <span class="theTO" placement="bottom" ngbTooltip="{{ item.duration }}">TO</span> <span class="Etime" placement="bottom" ngbTooltip="{{ item.Edate | date:'full' }}">{{ item.Edate | date:'MMM d, yy ~ H:m' }}</span> 
+                    </div>
+                    <div class=" float-right">
+                        
+                        <span class="badge badge-light" *ngIf="item.flag == 'Active'"><i class="fas fa-heart"></i> Going</span> <span class="badge badge-secondary" *ngIf="item.flag != 'Active'"><i class="far fa-heart"></i> Not Going</span> &nbsp;
+                        <span (click)="showContent(item)" placement="left" ngbTooltip="Show/Hide event">  <i *ngIf="item.openState == 'hide'" class="fas fa-eye-slash"></i><i *ngIf="item.openState == 'show'" class="fas fa-eye"></i></span>&nbsp;
+                        <span (click)="deltodoitemConfirmed(content,item.key)" placement="left" ngbTooltip="Delete event"> <i class="fas fa-trash-alt"></i></span>
+                    </div>
+                    
+                </div>
+
+            
+                <div class="card-body"  [@ShowHide]="item.openState">
+                    <div class="row">
+                        <div class="col-sm-10 b">                    
+                            <p class="card-text" class="ItemCSS">{{ item.item }}</p>                        
+                        </div>
+                        <!-- <div class="col-sm-2  DTclass" placement="top" ngbTooltip="Event Duration">
+                                <i class="far far fa-calendar-alt fa-3x" style="color: gray; margin-bottom: 10px;"></i>
+                                    <br>
+                                <span class="DurSpan"><b>{{ item.duration }} </b></span>
+                                <div class="NoGPS" *ngIf="item.Longitude == 0 && item.Latitude == 0">No GPS info.</div>
+                        </div> -->
+                    </div>
+                <!-- <h5 class="card-title">{{ item.date }}</h5> -->
+                </div>
+
+                <div class="card-footer">
+                    <div class="btn-group pull-right" role="group" aria-label="Basic example" placement="top" ngbTooltip="Specified upon the event start and end time"> 
+                        <button type="button" class="btn btn-success disabled">
+                            <i class="fas fa-calendar-check"></i> {{ item.itemStauts }}
+                        </button>
+                        
+                        <!-- Another way to handel the IF-ELSE
+                            <button type="button" class="btn btn-outline-info" (click)="updateTodoitem(item.key,item.flag)" ngbTooltip="Update event">
+                            <div *ngIf="item.flag  === 'Active'; else ElseIfStatus">
+                                <i class="fas fas fa-check-circle"></i> 
+                            </div>
+                            <ng-template  #ElseIfStatus><i class="fas fa-undo"></i> </ng-template>
+                        </button> -->
+                        <button *ngIf="item.flag  === 'Active'" type="button" class="btn btn-outline-info" (click)="updateTodoitem(item.key,item.flag)" ngbTooltip="Going" placement="right" [disabled]="item.itemStauts == 'Completed'">
+                            <i  class="fas fa-heart"></i> 
+                        </button>
+
+                        <button *ngIf="item.flag  === 'Cancelled'" type="button" class="btn btn-outline-info" (click)="updateTodoitem(item.key,item.flag)" ngbTooltip="Not Going" placement="right">
+                            <i class="far fa-heart"></i> 
+                        </button>
+                    </div>
+                    <span  style="color: teal; font-size: 0.65em; font-weight: 100; font-style:italic !important; padding-left: 10px;" ngbTooltip="Last update"  placement="right"> {{ item.lastOp | amTimeAgo }} 
+                    </span>
+                    
+
+                    <div class="btn-group float-right" role="group" aria-label="Basic example">
+                        <div class="btn-group" role="group">
+                            <!-- <button id="btnGroupDrop1" type="button" class="btn btn-secondary dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" placement="left" ngbTooltip="Add to calender" [disabled]="item.itemStauts == 'Completed'"> -->
+                                <!-- <i class="fas fa-calendar-alt"></i>
+                            </button> -->
+                            <div class="dropdown-menu" aria-labelledby="btnGroupDrop1">
+                                <a [href]="googleCalendarEventUrl" (click)="addtocal(item.Sdate, item.Edate, item.item)" target="_blank" class="dropdown-item"><i class="fab fa-google"></i> Google</a>
+                                <a [href]="yahooCalendarEventUrl" (click)="addtocal(item.Sdate, item.Edate, item.item)" target="_blank" class="dropdown-item"><i class="fab fa-yahoo"></i> Yahoo</a>
+                                <a [href]="outlookCalendarEventUrl" (click)="addtocal(item.Sdate, item.Edate, item.item)" target="_blank" class="dropdown-item"><i class="fab fa-windows"></i> Outlook</a>
+                                <a [href]="outlookLiveCalendarEventUrl" (click)="addtocal(item.Sdate, item.Edate, item.item)" target="_blank" class="dropdown-item"><i class="fab fa-windows"></i> Outlook Live</a>
+                                <a [href]="iCalendarCalendarEventUrl" (click)="addtocal(item.Sdate, item.Edate, item.item)" target="_blank" class="dropdown-item"><i class="fab fa-apple"></i> iCalendar</a>
+                            </div>
+                        </div>
+                        <!-- <button type="button" (click)="sendemail(item)" class="btn btn-secondary" placement="left"  ngbTooltip="Send an email"><i class="fas fa-envelope"></i>  </button>
+                        <button type="button" (click)="gpsLocAndID(item.Longitude,item.Latitude,i)" class="btn btn-secondary" placement="left" ngbTooltip="Show/Hide Location"  [disabled]="item.Longitude == 0 && item.Latitude == 0"><i class="fas fa-map-marker-alt"></i></button> -->
+                        <!-- <button type="button" class="btn btn-secondary" placement="left" ngbTooltip="Send SMS"><i class="fas fa-comments"></i> </button> -->
+                    </div> 
+            </div>
+            <div class="card-footer" id="{{ i }}" *ngIf="item.Longitude != 0 && item.Latitude != 0 && ShowMapID == i">
+                <div class="card-body">
+
+                    <mgl-map 
+                        [style]="'mapbox://styles/mapbox/dark-v9'"
+                        [zoom]="[8.5]"
+                        [center]="[-82.452606, 27.964157]"
+                        [attributionControl]= false
+
+                    >
+                        <mgl-marker
+                        [lngLat]="[item.Longitude, item.Latitude]"
+                        >  
+                        </mgl-marker>
+
+                        <mgl-control 
+                            mglFullscreen
+                        >
+                        </mgl-control>
+
+                        <mgl-control
+                            mglNavigation
+                        >
+                        </mgl-control>
+                    
+                    </mgl-map>
+            
+                <a href="https://www.google.com/maps/dir/?api=1&destination={{item.Latitude}},{{item.Longitude}}" class="card-text GoogleLink" target="_blank" placement="left" ngbTooltip="Directions from Google maps">Get Directions</a>
+                </div>
+            </div>
+            <!-- {{ item.data | json }} -->           
+        </div>  
+
+    </div> 
+    
+</div>
+
+
+
+<app-loadingspinner *ngIf="loadSpinner">{{loadSpinner}}</app-loadingspinner>
+
+
+<!-- Modal to confirm deletion-->
+<ng-template #content let-c="close" let-d="dismiss">
+    <div class="modal-header">
+      <h4 class="modal-title" id="modal-basic-title">Event Reminder</h4>
+      <button type="button" class="close" aria-label="Close" (click)="d('Cross click')">
+          <span aria-hidden="true">&times;</span>
+      </button>
+    </div>
+    <div class="modal-body">
+        Do you want to delete this event(s).
+    </div>
+    <div class="modal-footer">
+        <button type="button" class="btn btn-outline-dark" (click)="c('confirmed')">YES</button>
+        <button type="button" class="btn btn-success" (click)="c('cancel')">Cancel</button>
+      </div>
+  </ng-template>
+
+
+
+  
+  
